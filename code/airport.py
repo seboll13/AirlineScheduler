@@ -20,6 +20,7 @@ def load_airports_positions() -> dict[str, tuple[float, float]]:
     
     Sources
     ----------
+    The Global Airport Database can be found here:
     https://www.partow.net/miscellaneous/airportdatabase/index.html#Downloads
     """
     coordinates = {}
