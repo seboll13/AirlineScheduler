@@ -7,10 +7,10 @@ from time import perf_counter
 from routes import Routes
 
 
-@wraps
 def timer(func):
     """Decorator to measure the execution time of a function.
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         start = perf_counter()
         result = func(*args, **kwargs)

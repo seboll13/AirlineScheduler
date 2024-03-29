@@ -1,7 +1,9 @@
 # other files
 *.csv
-*.txt
+GlobalAirportDatabase.txt
 .DS_Store
+
+py311_scheduler/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

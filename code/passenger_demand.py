@@ -2,6 +2,7 @@
 """
 from requests import get
 from requests.exceptions import RequestException
+from worldbank import WorldBank
 
 
 def get_city_population_geonames(city_name, username):
@@ -24,7 +25,7 @@ def get_city_population_geonames(city_name, username):
         'cities': 'cities1000' # Limits search to cities with a population > 1000
     }
     try:
-        response = get(base_url, params=params)
+        response = get(base_url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
         if data['totalResultsCount'] > 0:
@@ -58,3 +59,16 @@ class PassengerDemand:
         p_i = get_city_population_geonames(self.origin.location, username)
         p_j = get_city_population_geonames(self.destination.location, username)
         return (p_i+p_j, p_i*p_j)
+
+
+    def get_gdps(self) -> tuple[float, float]:
+        """Get the GDPs of the origin and destination countries
+
+        Returns
+        ----------
+        tuple[float, float]
+            The sum and product of both GDPs    
+        """
+        gdp_i = WorldBank(self.origin.country).get_gdp()
+        gdp_j = WorldBank(self.destination.country).get_gdp()
+        return (gdp_i+gdp_j, gdp_i*gdp_j)
