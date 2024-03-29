@@ -68,6 +68,8 @@ class Routes:
     def __init__(self, hub_icao, dest_icao):
         self.hub_airport = Airport(hub_icao)
         self.dest_airport = Airport(dest_icao)
+        if self.dest_airport.latitude is None or self.dest_airport.longitude is None:
+            raise ValueError(f'No such airport with ICAO code {dest_icao}')
         self.distance = self.get_distance()
 
 
