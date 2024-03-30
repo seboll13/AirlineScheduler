@@ -63,6 +63,19 @@ def fetch_all_indicators():
         source += 1
 
 
+def generate_indicator_dict():
+    """Creates a dictionary of indicator names and their respective IDs.
+    
+    Returns
+    ----------
+    dict
+        A dictionary of indicator (id, name) key-value pairs
+    """
+    return {
+        idct['id']: idct['name'] for indicators in fetch_all_indicators() for idct in indicators
+    }
+
+
 def generate_country_codes_dict():
     """Creates a dictionary of country names and their respective codes.
     

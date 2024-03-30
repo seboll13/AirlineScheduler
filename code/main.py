@@ -1,16 +1,15 @@
 """Main module to run the program.
 """
-from pathlib import Path
 from routes import Routes
-from passenger_demand import PassengerDemand
-from wb_helpers import get_data_for_url
 
-root_path = Path(__file__).parent.parent
+
+DEP_ICAO = 'LSGG'
+ARR_ICAO = 'OMDB'
 
 
 if __name__ == "__main__":
-    # route = Routes('LSGG', 'OMDB')
-    # pops = PassengerDemand(route).get_populations()
-    # gdps = PassengerDemand(route).get_gdps()
-    # print(pops, gdps)
-    print(get_data_for_url('https://api.worldbank.org/v2/', 1, 1))
+    route_1 = Routes(DEP_ICAO, ARR_ICAO)
+    print(f'Demand for {DEP_ICAO}-{ARR_ICAO}: {route_1.get_approximate_pax_demand()}')
+
+    route_2 = Routes(ARR_ICAO, DEP_ICAO)
+    print(f'Demand for {ARR_ICAO}-{DEP_ICAO}: {route_2.get_approximate_pax_demand()}')
