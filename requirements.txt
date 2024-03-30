@@ -18,4 +18,3 @@ six==1.16.0
 tabulate==0.8.10
 tzlocal==5.2
 urllib3==2.2.1
-wbdata==1.0.0
