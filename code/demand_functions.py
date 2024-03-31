@@ -7,10 +7,15 @@ from numpy import exp, log, sqrt
 from scipy.stats import lognorm
 
 
-WEIGHT_PF: float = 0.3
+WEIGHT_PF: float = 0.4
 WEIGHT_EF: float = 0.3
 WEIGHT_TF: float = 0.2
-WEIGHT_DF: float = 0.2
+WEIGHT_DF: float = 1 - (WEIGHT_PF + WEIGHT_EF + WEIGHT_TF)
+
+PEAK_SEASON_MULTIPLIER: float = 1.5
+STD_SEASON_MULTIPLIER: float = 1.0
+OFF_PEAK_SEASON_MULTIPLIER: float = 0.5
+
 DEMAND_SCALING_FACTOR: int = 10_000
 
 
@@ -110,6 +115,11 @@ def __compute_distance_factor(
         logarithm of the distance scaled to ensure a factor between 0 and 1.
 
         Naturally, the closer the cities, the higher the demand.
+    
+    Parameters
+    ----------
+    distance : float
+        The distance between the origin and destination cities
 
     Returns
     ----------
@@ -142,11 +152,13 @@ def _get_seasonality_factor(curr_date: date) -> float:
         The seasonality factor SF, where 0.5 <= SF <= 1.5.
     """
     curr_month = curr_date.month
-    if 6 <= curr_month <= 8 or curr_month == 12:
-        return 1.5
-    if curr_month in [1,2]:
-        return 0.5
-    return 1.0
+    match curr_month:
+        case 6 | 7 | 8 | 12:
+            return PEAK_SEASON_MULTIPLIER
+        case 1 | 2:
+            return OFF_PEAK_SEASON_MULTIPLIER
+        case _:
+            return STD_SEASON_MULTIPLIER
 
 
 def __compute_composite_score(distance, **kwargs) -> float:
