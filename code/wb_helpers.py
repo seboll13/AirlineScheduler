@@ -1,10 +1,10 @@
 """Helper functions for the World Bank Class.
 """
 from logging import getLogger, basicConfig, INFO
+from code.helpers import timer
 from pathlib import Path
 from requests import get
 
-from helpers import timer
 
 MAX_SOURCE_ID = 89
 BASE_URL = "https://api.worldbank.org/v2/"
@@ -12,6 +12,27 @@ BASE_URL = "https://api.worldbank.org/v2/"
 
 basicConfig(filename='worldbank.log', level=INFO)
 logger = getLogger(__name__)
+
+
+def fetch_country_codes():
+    """Creates a dictionary of country names and their respective codes.
+    
+    Returns
+    ----------
+    dict
+        A dictionary of country names and their respective codes
+    """
+    page = 1
+    while True:
+        url = f'{BASE_URL}country?format=json&page={page}'
+        response = get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        for country in data[1]:
+            yield country['name'], country['id']
+        if data[0]['page'] >= data[0]['pages']:
+            break
+        page += 1
 
 
 def get_data_for_url(base_url: str, source: int, page: int) -> dict:
@@ -73,23 +94,6 @@ def generate_indicator_dict():
     """
     return {
         idct['id']: idct['name'] for indicators in fetch_all_indicators() for idct in indicators
-    }
-
-
-def generate_country_codes_dict():
-    """Creates a dictionary of country names and their respective codes.
-    
-    Returns
-    ----------
-    dict
-        A dictionary of country names and their respective codes
-    """
-    url = f'{BASE_URL}country?format=json'
-    response = get(url, timeout=10)
-    response.raise_for_status()
-    data = response.json()
-    return {
-        country['name']: country['id'] for country in data[1]
     }
 
 

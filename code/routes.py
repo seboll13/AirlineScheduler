@@ -2,14 +2,15 @@
 """
 from pathlib import Path
 from shutil import move
-from airport import Airport
-from passenger_demand import PassengerDemand
-from helpers import degrees_to_radians, gc_distance, timer
+
+from code.airport import Airport
+from code.passenger_demand import PassengerDemand
+from code.helpers import degrees_to_radians, gc_distance, timer
 
 
 @timer
-def populate_distances_in_csv(routes_csv: Path) -> None:
-    """Populates the distances of each route in the csv file.
+def populate_demands_in_csv(routes_csv: Path) -> None:
+    """Populates the passenger demands of each route in the csv file.
     
     Parameters
     ----------
@@ -20,18 +21,42 @@ def populate_distances_in_csv(routes_csv: Path) -> None:
     with open(routes_csv, 'r', encoding='utf-8') as infile, \
         open(temp_file, 'w', encoding='utf-8') as outfile:
         header = next(infile).strip()
-        outfile.write(header + ',distance\n')
+        outfile.write(header + ',first_class_demand,business_class_demand,economy_class_demand\n')
         for line in infile:
             line = line.strip()
             if line:
-                hub, dst = line.split(',')
-                route = Routes(hub.strip(), dst.strip())
-                outfile.write(f'{line},{route.distance:.2f}\n')
+                hub, dst, _ = line.split(',')
+                route = Route(hub.strip(), dst.strip())
+                fcd, bcd, ecd = route.get_approximate_pax_demand()
+                outfile.write(f'{line},{fcd},{bcd},{ecd}\n')
     # replace the original file with the updated temp file
     move(temp_file, routes_csv)
 
 
-class Routes:
+@timer
+def populate_routes_in_csv(routes_csv: Path, destinations_csv: Path) -> None:
+    """Writes all the routes informations to a CSV file.
+    
+    Parameters
+    ----------
+    routes_csv : str
+        The file path of the csv file to write the routes to.
+    destinations_csv : str
+        The file path of the csv file containing all destinations.
+    """
+    with open(routes_csv, 'w', encoding='utf-8') as f:
+        f.write('hub_id,destination_id,distance,first_class_demand,business_class_demand,economy_class_demand\n')
+        with open(destinations_csv, 'r', encoding='utf-8') as infile:
+            next(infile)
+            for line in infile:
+                dest_icao = line.split(',')[0].strip()
+                route = Route('LSGG', dest_icao)
+                fcd, bcd, ecd = route.get_approximate_pax_demand()
+                f.write(f'LSGG,{dest_icao},{route.distance:.2f},{fcd},{bcd},{ecd}\n')
+                break
+
+
+class Route:
     """A class to represent a route between two airports.
     """
     def __init__(self, hub_icao, dest_icao):

@@ -4,8 +4,10 @@ from functools import wraps
 from pathlib import Path
 from time import perf_counter
 from logging import basicConfig, INFO, info
+from typing import Union
 
 import numpy as np
+from requests import RequestException, get
 
 
 basicConfig(level=INFO)
@@ -128,3 +130,41 @@ def gc_distance(airport_coords1: tuple, airport_coords2: tuple) -> float:
     return 2 * earth_radius_km * np.arcsin(np.sqrt(
         haversin(phi2-phi1) + np.cos(phi1)*np.cos(phi2)*haversin(lambda2-lambda1)
     ))
+
+
+def get_city_population_geonames(city_name: str, username: str) -> Union[int, None]:
+    """
+    Fetches the population of a specified city using the GeoNames API.
+
+    Parameters
+    -----------
+    city_name : str
+        The name of the city to search for.
+    username : str
+        The username to use for the GeoNames API.
+
+    Returns
+    -----------
+    int
+        The population of the city, or None if no data was found.
+    """
+    base_url = "http://api.geonames.org/searchJSON"
+    params = {
+        'q': city_name,
+        'maxRows': 1,
+        'username': username,
+        'isNameRequired': True,
+        'cities': 'cities1000' # Limits search to cities with a population > 1000
+    }
+    try:
+        response = get(base_url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data['totalResultsCount'] > 0:
+            population = data['geonames'][0].get('population')
+            return population
+        print(f"No data found for {city_name}.")
+        return None
+    except RequestException as e:
+        print(f"Failed to retrieve data from GeoNames: {e}")
+        return None

@@ -1,3 +1,5 @@
+"""Module to handle database operations.
+"""
 from mysql import connector
 
 

@@ -5,8 +5,9 @@ https://api.worldbank.org/v2/country/indicator/ny.gdp.pcap.cd?date=2023&format=j
 """
 from requests import get
 from datetime import date
-from helpers import timer
-from wb_helpers import generate_country_codes_dict, BASE_URL
+
+from code.helpers import timer
+from code.wb_helpers import fetch_country_codes, BASE_URL
 
 
 GDP_PER_CAPITA_USD = "ny.gdp.pcap.cd"
@@ -19,7 +20,7 @@ class WorldBank:
     """
     def __init__(self, country):
         self.country = country
-        self.country_code = generate_country_codes_dict()[country]
+        self.country_code = dict(fetch_country_codes())[country]
 
 
     def get_category(self, category) -> float:
