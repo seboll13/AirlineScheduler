@@ -4,6 +4,7 @@ GlobalAirportDatabase.txt
 .DS_Store
 
 py311_scheduler/
+code/caches/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,11 +1,18 @@
 """Module to represent a route between two airports.
 """
+from functools import lru_cache
+from logging import info, basicConfig, INFO
 from pathlib import Path
 from shutil import move
 
 from code.airport import Airport
 from code.passenger_demand import PassengerDemand
 from code.helpers import degrees_to_radians, gc_distance, timer
+
+
+MAIN_HUB = 'LSGG'
+
+basicConfig(level=INFO)
 
 
 @timer
@@ -33,7 +40,6 @@ def populate_demands_in_csv(routes_csv: Path) -> None:
     move(temp_file, routes_csv)
 
 
-@timer
 def populate_routes_in_csv(routes_csv: Path, destinations_csv: Path) -> None:
     """Writes all the routes informations to a CSV file.
     
@@ -48,12 +54,15 @@ def populate_routes_in_csv(routes_csv: Path, destinations_csv: Path) -> None:
         f.write('hub_id,destination_id,distance,first_class_demand,business_class_demand,economy_class_demand\n')
         with open(destinations_csv, 'r', encoding='utf-8') as infile:
             next(infile)
-            for line in infile:
+            for i, line in enumerate(infile):
                 dest_icao = line.split(',')[0].strip()
-                route = Route('LSGG', dest_icao)
+                info(f'Processing route {MAIN_HUB} -> {dest_icao}')
+                route = Route(MAIN_HUB, dest_icao)
                 fcd, bcd, ecd = route.get_approximate_pax_demand()
-                f.write(f'LSGG,{dest_icao},{route.distance:.2f},{fcd},{bcd},{ecd}\n')
-                break
+                f.write(f'{MAIN_HUB},{dest_icao},{route.distance:.2f},{fcd},{bcd},{ecd}\n')
+                if i == 2:
+                    break
+    info('Finished processing all routes.')
 
 
 class Route:
@@ -67,6 +76,8 @@ class Route:
         self.distance = self.get_distance()
 
 
+    @timer
+    @lru_cache()
     def get_distance(self):
         """Gets the flying distance of the route
 

@@ -3,12 +3,13 @@
 API calls will ressemble this:
 https://api.worldbank.org/v2/country/indicator/ny.gdp.pcap.cd?date=2023&format=json
 """
-from requests import get
+import shelve
 from datetime import date
 
 from code.helpers import timer
 from code.wb_helpers import fetch_country_codes, BASE_URL
 
+from requests import get
 
 GDP_PER_CAPITA_USD = "ny.gdp.pcap.cd"
 PRICE_LEVEL_INDEX = "pa.nus.pppc.rf"
@@ -23,7 +24,7 @@ class WorldBank:
         self.country_code = dict(fetch_country_codes())[country]
 
 
-    def get_category(self, category) -> float:
+    def get_category(self, category: str) -> float:
         """Gets the data for a given category.
         
         Parameters
@@ -51,6 +52,27 @@ class WorldBank:
                 return -1.0
 
 
+    def get_category_with_cache(self, category: str) -> float:
+        """Gets a specific cateogry with caching.
+        
+        Parameters
+        ----------
+        category : str
+            The category to get the data for
+        
+        Returns
+        ----------
+        float
+            The data for the given category; -1.0 if no data is found
+        """
+        with shelve.open(f'caches/{category}_cache') as db:
+            if self.country_code in db:
+                return db[self.country_code]
+            value = self.get_category(category)
+            db[self.country_code] = value
+            return value
+
+
     @timer
     def get_gdp(self):
         """Gets the GDP per capita of the country.
@@ -60,7 +82,7 @@ class WorldBank:
         float
             The total market value of all produced goods and services divided by the population
         """
-        return self.get_category(GDP_PER_CAPITA_USD)
+        return self.get_category_with_cache(GDP_PER_CAPITA_USD)
 
 
     @timer
@@ -72,7 +94,7 @@ class WorldBank:
         float
             The ratio of the PPP conversion factor to the exchange rate
         """
-        return self.get_category(PRICE_LEVEL_INDEX)
+        return self.get_category_with_cache(PRICE_LEVEL_INDEX)
 
 
     @timer
@@ -84,4 +106,4 @@ class WorldBank:
         float
             Amount of money (in $USD) that tourists in the given country spend
         """
-        return self.get_category(TOURISM_EXPENDITURE)
+        return self.get_category_with_cache(TOURISM_EXPENDITURE)

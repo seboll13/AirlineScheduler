@@ -59,9 +59,15 @@ class TestPassengerDemand(TestCase):
     def test_correctness_of_seasonality_factor(self):
         """Checks that the seasonality factor changes correctly with the month.
         """
-        self.assertEqual(_get_seasonality_factor(date(2023,1,1)), OFF_PEAK_SEASON_MULTIPLIER)
-        self.assertEqual(_get_seasonality_factor(date(2023,6,1)), PEAK_SEASON_MULTIPLIER)
-        self.assertEqual(_get_seasonality_factor(date(2023,9,1)), STD_SEASON_MULTIPLIER)
+        self.assertEqual(
+            _get_seasonality_factor(date(2023,1,1)), OFF_PEAK_SEASON_MULTIPLIER
+        )
+        self.assertEqual(
+            _get_seasonality_factor(date(2023,6,1)), PEAK_SEASON_MULTIPLIER
+        )
+        self.assertEqual(
+            _get_seasonality_factor(date(2023,9,1)), STD_SEASON_MULTIPLIER
+        )
 
 
 if __name__ == "__main__":
