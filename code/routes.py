@@ -54,14 +54,14 @@ def populate_routes_in_csv(routes_csv: Path, destinations_csv: Path) -> None:
         f.write('hub_id,destination_id,distance,first_class_demand,business_class_demand,economy_class_demand\n')
         with open(destinations_csv, 'r', encoding='utf-8') as infile:
             next(infile)
-            for i, line in enumerate(infile):
+            for line in infile:
                 dest_icao = line.split(',')[0].strip()
+                if dest_icao == MAIN_HUB:
+                    continue
                 info(f'Processing route {MAIN_HUB} -> {dest_icao}')
                 route = Route(MAIN_HUB, dest_icao)
                 fcd, bcd, ecd = route.get_approximate_pax_demand()
                 f.write(f'{MAIN_HUB},{dest_icao},{route.distance:.2f},{fcd},{bcd},{ecd}\n')
-                if i == 2:
-                    break
     info('Finished processing all routes.')
 
 

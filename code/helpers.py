@@ -1,6 +1,6 @@
 """Helper functions for the project.
 """
-from functools import wraps
+from functools import lru_cache, wraps
 from pathlib import Path
 from time import perf_counter
 from logging import basicConfig, INFO, info
@@ -21,7 +21,7 @@ def timer(func):
         start = perf_counter()
         result = func(*args, **kwargs)
         end = perf_counter()
-        info('Execution time of %s: %.2f seconds.', func.__name__, end - start)
+        #info('Execution time of %s: %.2f seconds.', func.__name__, end - start)
         return result
     return wrapper
 
@@ -132,6 +132,7 @@ def gc_distance(airport_coords1: tuple, airport_coords2: tuple) -> float:
     ))
 
 
+@lru_cache()
 def get_city_population_geonames(city_name: str, username: str) -> Union[int, None]:
     """
     Fetches the population of a specified city using the GeoNames API.
@@ -161,8 +162,7 @@ def get_city_population_geonames(city_name: str, username: str) -> Union[int, No
         response.raise_for_status()
         data = response.json()
         if data['totalResultsCount'] > 0:
-            population = data['geonames'][0].get('population')
-            return population
+            return data['geonames'][0].get('population')
         print(f"No data found for {city_name}.")
         return None
     except RequestException as e:

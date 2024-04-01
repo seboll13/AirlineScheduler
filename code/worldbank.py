@@ -15,13 +15,37 @@ GDP_PER_CAPITA_USD = "ny.gdp.pcap.cd"
 PRICE_LEVEL_INDEX = "pa.nus.pppc.rf"
 TOURISM_EXPENDITURE = "st.int.xpnd.cd"
 
+COUNTRY_CODES = dict(fetch_country_codes())
+
+KNOWN_EXCEPTIONS = {
+    'Czech Republic': 'Czechia',
+    'Turkey': 'Turkiye',
+    'Slovakia': 'Slovak Republic',
+    'South Korea': 'Korea, Rep.',
+}
+
 
 class WorldBank:
     """Class used for wbdata collection.
     """
     def __init__(self, country):
-        self.country = country
-        self.country_code = dict(fetch_country_codes())[country]
+        if country in COUNTRY_CODES:
+            self.country = country
+            self.country_code = COUNTRY_CODES[country]
+        else:
+            keys = list(COUNTRY_CODES.keys())
+            # check if the country appears as substring of one of the keys
+            for key in keys:
+                if country in key:
+                    self.country = key
+                    self.country_code = COUNTRY_CODES[key]
+                    break
+            else:
+                if country not in KNOWN_EXCEPTIONS:
+                    raise ValueError(f'Country {country} not found in the World Bank API')
+                wb_name = KNOWN_EXCEPTIONS[country]
+                self.country = wb_name
+                self.country_code = COUNTRY_CODES[wb_name]
 
 
     def get_category(self, category: str) -> float:

@@ -67,7 +67,7 @@ class PassengerDemand:
             Both PLIs, plus their sum and product  
         """
         pli_i = self.origin_wb.get_pli()
-        pli_j =self.destination_wb.get_pli()
+        pli_j = self.destination_wb.get_pli()
         return (pli_i, pli_j, pli_i+pli_j, pli_i*pli_j)
 
 

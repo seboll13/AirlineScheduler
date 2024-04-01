@@ -1,6 +1,6 @@
 """Helper functions for the World Bank Class.
 """
-from logging import getLogger, basicConfig, INFO
+from logging import basicConfig, INFO, info
 from code.helpers import timer
 from pathlib import Path
 from requests import get
@@ -10,8 +10,7 @@ MAX_SOURCE_ID = 89
 BASE_URL = "https://api.worldbank.org/v2/"
 
 
-basicConfig(filename='worldbank.log', level=INFO)
-logger = getLogger(__name__)
+basicConfig(level=INFO)
 
 
 def fetch_country_codes():
@@ -54,11 +53,11 @@ def get_data_for_url(base_url: str, source: int, page: int) -> dict:
     """
     response = get(f'{base_url}indicators?source={source}&page={page}&format=json', timeout=10)
     if response.status_code != 200:
-        logger.info('Skipping source %s due to HTTP error %s', source, response.status_code)
+        info('Skipping source %s due to HTTP error %s', source, response.status_code)
         return {}
     data = response.json()
     if len(data) != 2 or 'page' not in data[0]:
-        logger.info('Unexpected data structure for source %s, skipping.', source)
+        info('Unexpected data structure for source %s, skipping.', source)
         return {}
     return data
 
